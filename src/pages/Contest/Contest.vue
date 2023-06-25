@@ -1,6 +1,6 @@
 <template>
     <div class="w-full">
-        <div class="wrapper" v-loading="loadingContest">
+        <div class="wrapper" v-loading="loadingContest" v-if="contest">
             <div class="intro-image relative">
                 <img
                     class="w-full h-[300px] object-cover opacity-40"
@@ -116,7 +116,12 @@
                 ></div>
             </div>
 
-            <el-tabs v-model="activeTabName" tab-position="top" type="border-card" class="tabs mt-10">
+            <el-tabs
+                v-model="activeTabName"
+                tab-position="top"
+                type="border-card"
+                class="tabs mt-10"
+            >
                 <el-tab-pane
                     class="tab"
                     :label="item.label"
@@ -150,7 +155,7 @@ export default {
             loadingPayment: false,
             loadingSubmit: false,
             loadingContest: false,
-            contest: {},
+            contest: null,
             total_price: null,
             payment_url: null,
             activeTabName: "contest_info",
