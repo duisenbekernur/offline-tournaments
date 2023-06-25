@@ -4,6 +4,7 @@
 
 <script>
 import L from "leaflet";
+import { Icon } from "leaflet";
 import "leaflet/dist/leaflet.css";
 import * as ELG from "esri-leaflet-geocoder";
 
@@ -12,6 +13,7 @@ export default {
     props: {
         latitude: Number,
         longitude: Number,
+        permission: String,
     },
     data() {
         return {
@@ -34,6 +36,13 @@ export default {
             maxZoom: 18,
         }).addTo(this.map);
 
+        const icon = L.icon({
+            iconUrl: "/marker.png",
+            iconSize: [24, 24],
+            iconAnchor: [2, 2],
+            popupAnchor: [0, -2],
+        });
+
         // get the user's location
         if (!(this.latitude || this.longitude))
             navigator.geolocation.getCurrentPosition(
@@ -41,7 +50,9 @@ export default {
                     // set the map's view to the user's location
                     this.map.setView([position.coords.latitude, position.coords.longitude], 13);
                     // add a marker at the user's location
-                    L.marker([position.coords.latitude, position.coords.longitude]).addTo(this.map);
+                    L.marker([position.coords.latitude, position.coords.longitude], { icon }).addTo(
+                        this.map
+                    );
                 },
                 error => {
                     // handle the error
@@ -51,7 +62,7 @@ export default {
         else {
             this.map.setView([+this.latitude, +this.longitude], 13);
             // add a marker at the user's location
-            L.marker([+this.latitude, +this.longitude]).addTo(this.map);
+            L.marker([+this.latitude, +this.longitude], { icon }).addTo(this.map);
         }
 
         this.geocodeService = ELG.geocodeService({
@@ -59,6 +70,7 @@ export default {
         });
 
         this.map.on("click", async e => {
+            if (this.permission === "get") return;
             const lat = e.latlng.lat;
             const lng = e.latlng.lng;
 
@@ -93,7 +105,7 @@ export default {
                 city: this.city,
                 country: this.country,
             });
-            L.marker([lat, lng]).addTo(this.map);
+            L.marker([lat, lng], { icon }).addTo(this.map);
         });
     },
     methods: {},

@@ -128,6 +128,7 @@
                     <div class="flex flex-col mx-auto w-1/3">
                         <h1 class="font-bold text-5xl mb-4">Местоположение</h1>
                         <Map
+                            :permission="'get'"
                             :latitude="contest.locations[0].latitude"
                             :longitude="contest.locations[0].longitude"
                         />
@@ -206,9 +207,7 @@ export default {
 
             this.loadingSubmit = false;
         },
-        async deleteContest() {
-
-        },
+        async deleteContest() {},
         async rubRate() {
             const API_KEY = "7ccdc9fb798a1be907efa338";
 
