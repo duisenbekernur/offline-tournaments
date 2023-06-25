@@ -70,39 +70,49 @@
                         </tbody>
                     </table>
 
-                    <div
-                        v-if="user.id === contest.organizerId"
-                        class="absolute bottom-0 flex gap-2"
-                    >
-                        <div class="cursor-pointer px-2 py-1 rounded-lg bg-lime-500">
-                            <p class="text-xl">Вы создатель этого турнира</p>
+                    <div v-loading="loadingPayment">
+                        <div
+                            v-if="user.id === contest.organizerId"
+                            class="absolute bottom-0 flex gap-2"
+                        >
+                            <div class="px-2 py-1 rounded-lg bg-lime-500">
+                                <p class="text-xl">Вы создатель этого турнира</p>
+                            </div>
+                            <el-button @click="deleteContest" type="danger" size="large"
+                                >Отменить турнир</el-button
+                            >
                         </div>
-                        <el-button @click="deleteContest" type="danger" size="large"
-                            >Отменить турнир</el-button
+                        <div
+                            class="absolute bottom-0"
+                            v-else-if="paymentStatus === 'NOT REGISTERED'"
                         >
-                    </div>
-                    <div class="absolute bottom-0" v-else-if="paymentStatus === 'NOT REGISTERED'">
-                        <el-button
-                            v-loading="loadingSubmit"
-                            type="success"
-                            size="large"
-                            @click="submit"
-                            >Участвовать</el-button
-                        >
-                    </div>
-                    <div
-                        v-else-if="paymentStatus === 'succeeded'"
-                        class="absolute bottom-0 flex gap-2"
-                    >
-                        <div class="cursor-pointer px-2 py-1 rounded-lg bg-lime-500">
-                            <p class="text-xl">Вы уже участник турнира</p>
+                            <el-button
+                                v-loading="loadingSubmit"
+                                type="success"
+                                size="large"
+                                @click="submit"
+                                >Участвовать</el-button
+                            >
                         </div>
-                        <el-button @click="deleteContest" type="danger" size="large"
-                            >Отменить участие</el-button
+                        <div
+                            v-else-if="paymentStatus === 'waiting_for_capture'"
+                            class="absolute bottom-0 flex gap-2"
                         >
+                            <div class="cursor-pointer px-2 py-1 rounded-lg bg-lime-500">
+                                <p class="text-xl">Вы уже участник турнира</p>
+                            </div>
+                            <el-button @click="deleteContest" type="danger" size="large"
+                                >Отменить участие</el-button
+                            >
+                        </div>
                     </div>
                 </div>
-                <div @click="imageModalVisible = true" v-html="contest.qrCode" class="w-80"></div>
+                <div
+                    v-if="contest.id === user.id"
+                    @click="imageModalVisible = true"
+                    v-html="contest.qrCode"
+                    class="w-80"
+                ></div>
 
                 <!--                <el-image :src="contest.qrCode"></el-image>-->
             </div>
@@ -190,15 +200,22 @@ export default {
     methods: {
         async checkPayment() {
             this.loadingPayment = true;
-            await axiosInstance.post("/contest/paymentDetails", {
-                contestId: this.contest.id,
-                userId: this.user.id,
-            });
+            await axiosInstance
+                .post("/contest/paymentDetails", {
+                    contestId: this.contest.id,
+                    userId: this.user.id,
+                })
+                .then(res => {
+                    if (res.data.success) {
+                        this.paymentStatus = res.data.payment.status;
+                    }
+                });
 
             this.loadingPayment = false;
         },
         async getContest() {
             this.loadingContest = true;
+            this.loadingPayment = true;
 
             await axiosInstance
                 .get("/contest/getContest", {
@@ -212,6 +229,7 @@ export default {
                 });
 
             this.loadingContest = false;
+            this.loadingPayment = false;
         },
         async submit() {
             this.loadingSubmit = true;
