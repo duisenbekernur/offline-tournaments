@@ -18,6 +18,24 @@ const router = createRouter({
             path: "/contests/:contest_id",
             name: "contest_page",
             component: () => import("../pages/Contest/Contest.vue"),
+            redirect: { name: "contest_info" },
+            children: [
+                {
+                    path: "info",
+                    name: "contest_info",
+                    component: () => import("../pages/Contest/components/contest-info.vue"),
+                },
+                {
+                    path: "participants",
+                    name: "contest_participants",
+                    component: () => import("../pages/Contest/components/contest-participants.vue"),
+                },
+                {
+                    path: "chat",
+                    name: "contest_chat",
+                    component: () => import("../pages/Contest/components/contest-chat.vue"),
+                },
+            ],
         },
         {
             path: "/contests/create",

@@ -1,11 +1,12 @@
 <template>
     <div class="w-full">
-        <div v-loading="loadingContests" class="wrapper px-20 py-10">
+        <div v-loading="loadingContests" class="wrapper flex flex-wrap gap-8 px-20 py-10">
             <contest-card
                 v-for="contest in contests"
                 :contest="contest"
                 :category="category"
             ></contest-card>
+            <p v-if="contests.length === 0 && !loadingContests" class="text-center text-3xl">Нет данных</p>
         </div>
     </div>
 </template>

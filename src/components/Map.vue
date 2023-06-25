@@ -4,7 +4,6 @@
 
 <script>
 import L from "leaflet";
-import { Icon } from "leaflet";
 import "leaflet/dist/leaflet.css";
 import * as ELG from "esri-leaflet-geocoder";
 

@@ -78,7 +78,11 @@
                             <div class="px-2 py-1 rounded-lg bg-lime-500">
                                 <p class="text-xl">Вы создатель этого турнира</p>
                             </div>
-                            <el-button @click="deleteContest" type="danger" size="large"
+                            <el-button
+                                v-loading="loadingDelete"
+                                @click="deleteContest"
+                                type="danger"
+                                size="large"
                                 >Отменить турнир</el-button
                             >
                         </div>
@@ -101,64 +105,26 @@
                             <div class="cursor-pointer px-2 py-1 rounded-lg bg-lime-500">
                                 <p class="text-xl">Вы уже участник турнира</p>
                             </div>
-                            <el-button @click="deleteContest" type="danger" size="large"
-                                >Отменить участие</el-button
-                            >
                         </div>
                     </div>
                 </div>
                 <div
-                    v-if="contest.id === user.id"
+                    v-if="contest.organizerId === user.id && contest.visibility === 'public'"
                     @click="imageModalVisible = true"
                     v-html="contest.qrCode"
                     class="w-80"
                 ></div>
-
-                <!--                <el-image :src="contest.qrCode"></el-image>-->
             </div>
 
-            <div class="mt-8 w-[95%] mx-auto p-8 bg-gray-800 flex gap-8">
-                <div class="w-full relative flex gap-8">
-                    <div class="flex flex-col w-1/2">
-                        <h1 class="font-bold text-5xl mb-4">Предполагаемые затраты</h1>
-                        <hr class="w-full" />
-                        <table class="expenses-table">
-                            <thead>
-                                <tr class="text-gray-400 font-bold">
-                                    <th>Название</th>
-                                    <th>Колличество</th>
-                                    <th>Цена за штуку</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr
-                                    class="text-2xl"
-                                    v-for="item in contest.contestExpenses"
-                                    :key="item.id"
-                                >
-                                    <td>{{ item.name }}</td>
-                                    <td>{{ item.amount }}</td>
-                                    <td>{{ item.price }}₸</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                        <hr class="w-full my-2" />
-                        <p class="text-3xl">
-                            Общяя цена турнира -
-                            <span class="text-lime-300 font-bold">{{ total_price }}₸</span>
-                        </p>
-                    </div>
-
-                    <div class="flex flex-col mx-auto w-1/3">
-                        <h1 class="font-bold text-5xl mb-4">Местоположение</h1>
-                        <Map
-                            :permission="'get'"
-                            :latitude="contest.locations[0].latitude"
-                            :longitude="contest.locations[0].longitude"
-                        />
-                    </div>
-                </div>
-            </div>
+            <el-tabs v-model="activeTabName" tab-position="top" type="border-card" class="tabs mt-10">
+                <el-tab-pane
+                    class="tab"
+                    :label="item.label"
+                    :name="item.name"
+                    v-for="item in tabs"
+                ></el-tab-pane>
+                <router-view></router-view>
+            </el-tabs>
         </div>
 
         <el-dialog v-model="imageModalVisible">
@@ -180,17 +146,38 @@ export default {
         return {
             imageModalVisible: false,
             paymentStatus: "NOT REGISTERED",
+            loadingDelete: false,
             loadingPayment: false,
             loadingSubmit: false,
             loadingContest: false,
             contest: {},
             total_price: null,
             payment_url: null,
+            activeTabName: "contest_info",
+            tabs: [
+                {
+                    name: "contest_info",
+                    label: "Информация",
+                },
+                {
+                    name: "contest_participants",
+                    label: "Участники",
+                },
+                {
+                    name: "contest_chat",
+                    label: "Чат",
+                },
+            ],
         };
     },
     computed: {
         user() {
             return this.$store.getters["user/getUser"];
+        },
+    },
+    watch: {
+        activeTabName(newVal) {
+            this.$router.push({ name: newVal });
         },
     },
     async created() {
@@ -258,7 +245,18 @@ export default {
 
             this.loadingSubmit = false;
         },
-        async deleteContest() {},
+        async deleteContest() {
+            this.loadingDelete = true;
+            await axiosInstance
+                .post("/contest/deleteContest", { contestId: this.contest.id })
+                .then(res => {
+                    if (res.data.success) {
+                        notification("Успешно удалено", "success");
+                        this.$router.push({ name: "main" });
+                    }
+                });
+            this.loadingDelete = false;
+        },
         async rubRate() {
             const API_KEY = "7ccdc9fb798a1be907efa338";
 
@@ -315,5 +313,13 @@ table th:first-child {
 table td:last-child,
 table th:last-child {
     padding-right: 0;
+}
+
+.tabs {
+    background-color: #1e293b;
+    border: 1px solid #3f3f46;
+}
+.tab {
+    background-color: blue;
 }
 </style>

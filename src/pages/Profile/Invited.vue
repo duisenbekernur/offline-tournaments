@@ -1,6 +1,6 @@
 <template>
   <div class="w-full">
-    <div class="wrapper text-black">dwfew</div>
+    <div class="wrapper text-black"></div>
   </div>
 </template>
 
