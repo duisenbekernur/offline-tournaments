@@ -24,7 +24,7 @@
                 </div>
             </div>
 
-            <div class="mt-8 w-[95%] mx-auto p-8 bg-gray-800 flex gap-8">
+            <div class="mt-8 relative w-[95%] mx-auto p-8 bg-gray-800 flex gap-8">
                 <div class="w-[250px] h-[250px]">
                     <img
                         class="w-[250px] h-[250px] object-cover"
@@ -81,7 +81,7 @@
                             >Отменить турнир</el-button
                         >
                     </div>
-                    <div class="absolute bottom-0" v-else>
+                    <div class="absolute bottom-0" v-else-if="paymentStatus === 'NOT REGISTERED'">
                         <el-button
                             v-loading="loadingSubmit"
                             type="success"
@@ -90,7 +90,21 @@
                             >Участвовать</el-button
                         >
                     </div>
+                    <div
+                        v-else-if="paymentStatus === 'succeeded'"
+                        class="absolute bottom-0 flex gap-2"
+                    >
+                        <div class="cursor-pointer px-2 py-1 rounded-lg bg-lime-500">
+                            <p class="text-xl">Вы уже участник турнира</p>
+                        </div>
+                        <el-button @click="deleteContest" type="danger" size="large"
+                            >Отменить участие</el-button
+                        >
+                    </div>
                 </div>
+                <div @click="imageModalVisible = true" v-html="contest.qrCode" class="w-80"></div>
+
+                <!--                <el-image :src="contest.qrCode"></el-image>-->
             </div>
 
             <div class="mt-8 w-[95%] mx-auto p-8 bg-gray-800 flex gap-8">
@@ -136,6 +150,10 @@
                 </div>
             </div>
         </div>
+
+        <el-dialog v-model="imageModalVisible">
+            <div v-html="contest.qrCode" class="w-3/4 mx-auto"></div>
+        </el-dialog>
     </div>
 </template>
 
@@ -150,6 +168,9 @@ export default {
     components: { Map },
     data() {
         return {
+            imageModalVisible: false,
+            paymentStatus: "NOT REGISTERED",
+            loadingPayment: false,
             loadingSubmit: false,
             loadingContest: false,
             contest: {},
@@ -164,8 +185,18 @@ export default {
     },
     async created() {
         await this.getContest();
+        await this.checkPayment();
     },
     methods: {
+        async checkPayment() {
+            this.loadingPayment = true;
+            await axiosInstance.post("/contest/paymentDetails", {
+                contestId: this.contest.id,
+                userId: this.user.id,
+            });
+
+            this.loadingPayment = false;
+        },
         async getContest() {
             this.loadingContest = true;
 
@@ -196,6 +227,8 @@ export default {
             await axiosInstance
                 .post("/contest/payment", {
                     value,
+                    userId: this.user.id,
+                    contestId: this.contest.id,
                 })
                 .then(res => {
                     console.log(res.data);

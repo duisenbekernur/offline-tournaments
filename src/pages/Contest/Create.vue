@@ -240,6 +240,20 @@
                         </el-form-item>
 
                         <el-form-item>
+                            <!--                            <bank-card></bank-card>-->
+
+                            <div class="text-xl mb-1">
+                                Номер карты на котроую получите оплаты участников
+                            </div>
+                            <div class="w-2/3">
+                                <el-input
+                                    v-model="form.billingDetails.card_number"
+                                    placeholder="номер карты"
+                                ></el-input>
+                            </div>
+                        </el-form-item>
+
+                        <el-form-item>
                             <el-button
                                 class="ml-auto text-xl"
                                 size="large"
@@ -359,11 +373,12 @@
 <script>
 import { axiosInstance } from "../../api/client.js";
 import Map from "../../components/Map.vue";
+import BankCard from "../../components/BankCard.vue";
 import { notification } from "../../utils/helpers.js";
 
 export default {
     name: "Create",
-    components: { Map },
+    components: { BankCard, Map },
     data() {
         return {
             postLoading: false,
@@ -401,6 +416,9 @@ export default {
                 Expenses: [{ id: 1, name: "", amount: "", price: "" }],
                 team_count: null,
                 teams: [{ pos: 1, name: "", users: [{ pos: 1, name: "", telegram: null }] }],
+                billingDetails: {
+                    card_number: null,
+                },
             },
         };
     },

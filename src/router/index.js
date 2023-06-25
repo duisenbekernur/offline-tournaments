@@ -46,9 +46,9 @@ const router = createRouter({
                             component: () => import("../pages/Profile/History.vue"),
                         },
                         {
-                            path: "favorites",
-                            name: "profile_favorites",
-                            component: () => import("../pages/Profile/Favorites.vue"),
+                            path: "created-contests",
+                            name: "profile_created_contests",
+                            component: () => import("../pages/Profile/CreatedContests.vue"),
                         },
                         {
                             path: "invites",

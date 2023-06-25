@@ -18,9 +18,9 @@
         </div>
         <div class="text-center mt-16 text-2xl font-bold flex justify-between px-10" v-if="user">
             <div>
-                <p>{{ user.email }}</p>
+                <!--                <p>{{ user.email }}</p>-->
             </div>
-            <div class="">
+            <div class="ml-16">
                 <h3>{{ user.firstname + " " + user.lastname }}</h3>
             </div>
             <div>
@@ -35,8 +35,9 @@
         </div>
 
         <div v-if="user">
-            <el-tabs v-model="activeTabName" type="border-card" class="mt-10">
+            <el-tabs v-model="activeTabName" type="border-card" class="tabs mt-10">
                 <el-tab-pane
+                    class="tab"
                     :label="item.label"
                     :name="item.name"
                     v-for="item in tabs"
@@ -62,6 +63,10 @@ export default {
                 {
                     name: "profile_participated_contests",
                     label: "Турниры в котором участвуете",
+                },
+                {
+                    name: "profile_created_contests",
+                    label: "Созданные мной",
                 },
                 {
                     name: "profile_history",
@@ -116,4 +121,12 @@ export default {
 };
 </script>
 
-<style scoped></style>
+<style scoped>
+.tabs {
+    background-color: #1e293b;
+    border: 1px solid #3f3f46;
+}
+.tab {
+    background-color: blue;
+}
+</style>
