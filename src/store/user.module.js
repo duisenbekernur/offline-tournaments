@@ -1,7 +1,7 @@
 export default {
     namespaced: true,
     state: {
-        id: localStorage.getItem('userId') || null,
+        id: +localStorage.getItem('userId') || null,
     },
     mutations: {
         setId: (state, payload) => {

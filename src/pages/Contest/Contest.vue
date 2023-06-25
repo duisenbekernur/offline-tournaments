@@ -70,9 +70,26 @@
                         </tbody>
                     </table>
 
-                    <el-button class="absolute bottom-0" type="success"
-                        >Зарегистрироваться</el-button
+                    <div
+                        v-if="user.id === contest.organizerId"
+                        class="absolute bottom-0 flex gap-2"
                     >
+                        <div class="cursor-pointer px-2 py-1 rounded-lg bg-lime-500">
+                            <p class="text-xl">Вы создатель этого турнира</p>
+                        </div>
+                        <el-button @click="deleteContest" type="danger" size="large"
+                            >Отменить турнир</el-button
+                        >
+                    </div>
+                    <div class="absolute bottom-0" v-else>
+                        <el-button
+                            v-loading="loadingSubmit"
+                            type="success"
+                            size="large"
+                            @click="submit"
+                            >Участвовать</el-button
+                        >
+                    </div>
                 </div>
             </div>
 
@@ -108,7 +125,8 @@
                         </p>
                     </div>
 
-                    <div class="flex w-1/3">
+                    <div class="flex flex-col mx-auto w-1/3">
+                        <h1 class="font-bold text-5xl mb-4">Местоположение</h1>
                         <Map
                             :latitude="contest.locations[0].latitude"
                             :longitude="contest.locations[0].longitude"
@@ -123,16 +141,25 @@
 <script>
 import { axiosInstance } from "../../api/client.js";
 import Map from "../../components/Map.vue";
+import { notification } from "../../utils/helpers.js";
+import axios from "axios";
 
 export default {
     name: "Contest",
     components: { Map },
     data() {
         return {
+            loadingSubmit: false,
             loadingContest: false,
             contest: {},
             total_price: null,
+            payment_url: null,
         };
+    },
+    computed: {
+        user() {
+            return this.$store.getters["user/getUser"];
+        },
     },
     async created() {
         await this.getContest();
@@ -153,6 +180,53 @@ export default {
                 });
 
             this.loadingContest = false;
+        },
+        async submit() {
+            this.loadingSubmit = true;
+
+            if (+localStorage.getItem("userId") < 1) {
+                notification("Зайдите в аккаунт чтобы стать участником");
+                return this.$router.push({ name: "login" });
+            }
+            const rate = await this.rubRate();
+            const value = rate * this.contest.contestInfos[0].fee;
+            console.log("here", this.rubRate(), this.contest.contestInfos[0].fee);
+
+            await axiosInstance
+                .post("/contest/payment", {
+                    value,
+                })
+                .then(res => {
+                    console.log(res.data);
+                    if (res.data.makePaymentResult) {
+                        this.payment_url = res.data.makePaymentResult.confirmation.confirmation_url;
+                        window.open(this.payment_url, "_blank");
+                    }
+                });
+
+            this.loadingSubmit = false;
+        },
+        async deleteContest() {
+
+        },
+        async rubRate() {
+            const API_KEY = "7ccdc9fb798a1be907efa338";
+
+            const apiUrl = `https://v6.exchangerate-api.com/v6/${API_KEY}/latest/KZT`;
+            let rate = null;
+
+            await axios
+                .get(apiUrl)
+                .then(response => {
+                    const rates = response.data.conversion_rates;
+                    rate = rates.RUB;
+                })
+                .catch(error => {
+                    console.log("Error:", error.message);
+                    throw error;
+                });
+            console.log("here", rate);
+            return rate;
         },
     },
 };

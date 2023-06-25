@@ -11,7 +11,7 @@ export default {
         }, {
             title: "Волейбол",
             imgUrl: 'https://cdn.vox-cdn.com/thumbor/xPaZZJjNtTuz4ki5KN3Q2G3xRWE=/1400x788/filters:format(png)/cdn.vox-cdn.com/uploads/chorus_asset/file/22144753/Hinata11.png',
-            slug: 'voleyball'
+            slug: 'volleyball'
         }, {
             title: "Хоккей",
             imgUrl: 'https://i.pinimg.com/564x/af/69/3a/af693af6aace3bf7a96f1c400ccd2e67.jpg',
